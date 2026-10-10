@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <!-- TODO: update og/description metadata with final author list and page URL -->
+  <meta name="description" content="Project page: KOBRA: A Korean Observation-Based Regional Atmospheric Data Platform">
+  <meta property="og:title" content="KOBRA: A Korean Observation-Based Regional Atmospheric Data Platform"/>
+  <meta property="og:description" content="A 104-channel hourly dataset at 5 km and 500 m for 2006~2025, gridded from KMA surface, marine, and upper-air observations and served through a platform for extracting only the range users need."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="static/images/og.png"/>
+  <!-- TODO: og:image는 배포 후 절대 URL(https://<user>.github.io/<repo>/static/images/og.png)로 바꿔야 카톡·슬랙 미리보기에 뜸 -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>KOBRA: A Korean Observation-Based Regional Atmospheric Data Platform</title>
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script defer src="static/js/demos.js"></script>
+  <script defer src="static/js/charts.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script defer src="static/js/figures.js"></script>
+  <style>
+    :root {
+      --navy: #1b2a4a; --ink: #1f2633; --muted: #5b6475; --line: #dde3ee;
+      --soft: #f4f6fa; --tint: #eef2f8; --blue: #1f5fae;
+      --en: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+    }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body { font-family: 'Noto Sans KR', 'Inter', system-ui, sans-serif; font-size: 17px; line-height: 1.7; color: var(--ink); background: #fff; }
+    h1, h2, h3, .pill, .tab, .step-name { font-family: var(--en); }
+    a { color: var(--blue); }
+
+    /* ---------- hero ---------- */
+    .hero-k { background: var(--navy); color: #fff; text-align: center; padding: 88px 16px 72px; }
+    .hero-k h1 { font-size: clamp(1.75rem, 4.2vw, 2.85rem); font-weight: 800; line-height: 1.18; letter-spacing: -0.02em; max-width: 960px; margin: 0 auto; color: #fff; }
+    .hero-k .ko-title { font-size: clamp(1rem, 2vw, 1.2rem); color: #c9d4e8; margin: 0.9rem auto 0; max-width: 760px; word-break: keep-all; }
+    .hero-k .authors { font-family: var(--en); font-size: 1.1rem; margin-top: 1.6rem; }
+    .hero-k .venue { font-family: var(--en); font-size: 0.98rem; color: #c9d4e8; margin-top: 0.2rem; }
+    .hero-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 1.6rem; }
+    .hero-links a { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--en); font-weight: 600; font-size: 0.98rem;
+      padding: 0.55rem 1.2rem; border-radius: 999px; background: #fff; color: var(--navy); text-decoration: none; transition: background .15s; }
+    .hero-links a:hover { background: var(--tint); }
+    .hero-links a:focus-visible { outline: 3px solid #9fb6e0; outline-offset: 2px; }
+
+    /* ---------- sections ---------- */
+    .sec { padding: 80px 16px; }
+    .sec.alt { background: var(--soft); }
+    .sec > h2 { text-align: center; font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 700; letter-spacing: -0.015em; color: var(--navy); margin: 0 0 1.75rem; }
+    .prose { max-width: 880px; margin: 0 auto; }
+    .prose p { margin: 0 0 0.9em; word-break: keep-all; text-align: left; }
+    .prose p:last-child { margin-bottom: 0; }
+    .wide { max-width: 1100px; margin: 2.25rem auto 0; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05); }
+    .cap { text-align: center; color: var(--muted); font-size: 0.92rem; line-height: 1.6; margin: 0.8rem auto 0; max-width: 880px; word-break: keep-all; }
+    .zoom { cursor: zoom-in; width: 100%; display: block; border-radius: 8px; }
+
+    /* ---------- pills (demo & chart controls) ---------- */
+    .pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .pill { font-size: 0.9rem; font-weight: 500; line-height: 1; padding: 0.55rem 0.95rem; border-radius: 999px; cursor: pointer;
+      border: 1px solid var(--line); background: #fff; color: var(--ink); transition: background .15s, border-color .15s; white-space: nowrap; }
+    .pill:hover { border-color: #b7c3d9; }
+    .pill.is-on { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .pill:focus-visible, .tab:focus-visible { outline: 3px solid #9fb6e0; outline-offset: 2px; }
+    .demo-play { min-width: 6.2rem; }
+
+    /* ---------- Try KOBRA ---------- */
+    .try-grid { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); gap: 1.75rem; align-items: stretch; }
+    .try-side { display: flex; flex-direction: column; justify-content: center; gap: 1.6rem; }
+    .ctl-label { font-family: var(--en); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.45rem; }
+    .demo-map { position: relative; width: 100%; aspect-ratio: 164 / 158; background: #eef0f3; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .demo-map canvas, .demo-map img { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .demo-map canvas { image-rendering: pixelated; cursor: crosshair; }
+    .demo-map img { pointer-events: none; }
+    .demo-readout { font-size: 0.95rem; color: var(--ink); min-height: 3.2em; background: var(--soft); border-radius: 8px; padding: 0.6rem 0.8rem; word-break: keep-all; }
+    .demo-legend { display: flex; align-items: flex-start; gap: 0.6rem; width: 100%; max-width: 520px; margin: 0 auto; }
+    .demo-legend-inner { flex: 1; }
+    .demo-legend-bar { height: 12px; border-radius: 3px; overflow: hidden; border: 1px solid #c5ccd6; }
+    .demo-legend-ticks { position: relative; height: 1.5em; font-family: var(--en); font-size: 0.85rem; color: var(--muted); }
+    .demo-legend-ticks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+    .demo-legend-unit { font-family: var(--en); font-size: 0.85rem; color: var(--muted); white-space: nowrap; line-height: 12px; }
+    .demo-time { display: flex; align-items: center; gap: 0.75rem; }
+    .demo-time input[type=range] { flex: 1; min-width: 0; accent-color: var(--navy); }
+    .demo-time-label { min-width: 6.5em; font-family: var(--en); font-variant-numeric: tabular-nums; font-size: 0.92rem; color: var(--ink); }
+    .demo-row { max-width: 760px; margin: 1rem auto 0; }
+
+    /* ---------- section helpers ---------- */
+    .hint { max-width: 1100px; margin: 2rem auto 0.6rem; text-align: center; font-size: 0.88rem; color: var(--muted); word-break: keep-all; }
+    .hint + .wide { margin-top: 0; }
+    .subsec + .subsec { margin-top: 80px; }
+    .subsec > h3 { max-width: 880px; margin: 0 auto 1.1rem; text-align: center; font-size: clamp(1.2rem, 2.3vw, 1.5rem); font-weight: 700; letter-spacing: -0.01em; color: var(--navy); word-break: keep-all; }
+    .specs { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.45rem; max-width: 880px; margin: 1.25rem auto 0; }
+    .spec { font-family: var(--en); font-size: 0.82rem; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 0.3rem 0.85rem; color: var(--ink); }
+    .spec b { color: var(--blue); font-weight: 800; margin-right: 0.3rem; }
+
+    /* ---------- pipeline (Figure 1) ---------- */
+    .pipe-card { max-width: 1240px; padding: 1.5rem 1.25rem 1.25rem; }
+    .pipe { display: grid; grid-template-columns: 1.7fr 1.8fr 0.85fr 1.35fr 1fr; grid-template-rows: auto 1fr auto auto; column-gap: 1.1rem; row-gap: 0.9rem; font-size: 0.84rem; line-height: 1.45; }
+    .c1 { grid-column: 1; } .c2 { grid-column: 2; } .c3 { grid-column: 3; } .c4 { grid-column: 4; } .c5 { grid-column: 5; }
+    .r1 { grid-row: 1; } .r2 { grid-row: 2; } .r3 { grid-row: 3; } .r23 { grid-row: 2 / 4; }
+    .ph { position: relative; z-index: 0; border: 0; background: none; padding: 0.55rem 1.3rem 0.55rem 1.55rem; text-align: left; font-family: var(--en); font-weight: 700; font-size: 1rem; color: var(--navy); cursor: pointer; white-space: nowrap; transition: color .45s; }
+    .ph::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--tint); transition: background .45s;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%); }
+    .ph.c1 { padding-left: 0.9rem; }
+    .ph.c1::before { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); }
+    .ph.done { color: #fff; } .ph.done::before { background: var(--navy); }
+    .ph:focus-visible { outline: 3px solid #9fb6e0; outline-offset: 2px; }
+    .pc { display: flex; flex-direction: column; justify-content: center; gap: 0.4rem; cursor: pointer; transition: opacity .45s; }
+    .pc.dim { opacity: 0.4; }
+    .pb { display: block; border: 1.5px solid #8a96ad; border-radius: 8px; padding: 0.55rem 0.6rem; text-align: center; background: #fff; color: var(--muted); word-break: keep-all; transition: border-color .3s, box-shadow .3s; }
+    .pb b { display: block; font-size: 0.95rem; color: var(--navy); }
+    .pc.on .pb { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(31, 95, 174, 0.13); }
+    .pb.tint { background: var(--tint); border-color: #9fb6e0; }
+    .pb.dark { background: var(--navy); border-color: var(--navy); color: #d5deee; } .pb.dark b { color: #fff; }
+    .pc.on .pb.dark { box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.25); }
+    a.pb { text-decoration: none; padding: 0.8rem 0.6rem; }
+    a.pb:hover b { text-decoration: underline; }
+    a.pb:focus-visible { outline: 3px solid #9fb6e0; outline-offset: 2px; }
+    .grp { border: 1.5px solid #9fb6e0; background: #f5f8fd; border-radius: 10px; padding: 0.4rem 0.45rem 0.45rem; display: flex; flex-direction: column; gap: 0.35rem; }
+    .grp .gt { font-weight: 700; color: var(--navy); font-size: 0.85rem; padding-left: 0.15rem; }
+    .grp .pb { background: var(--tint); border-color: #9fb6e0; padding: 0.3rem 0.4rem; }
+    .pc.on .grp .pb { box-shadow: none; }
+    .arr { color: #6b778c; text-align: center; line-height: 1; font-size: 1.05rem; }
+    .p1, .p1b { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0.5rem; align-items: center; }
+    .p2 { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.4rem; align-items: center; }
+    .mini { margin: 0; text-align: center; color: var(--muted); font-size: 0.78rem; }
+    .mini svg, .mini canvas { display: block; width: 100%; height: auto; margin-bottom: 0.3rem; }
+    .mini-grid canvas { aspect-ratio: 164 / 158; }
+    .cube { position: relative; width: 100%; aspect-ratio: 1 / 1.05; }
+    .cube canvas { position: absolute; width: 73%; aspect-ratio: 164 / 158; background: #eef3f8; border: 1px solid #fff; box-shadow: 0 1px 4px rgba(16, 24, 40, 0.25); }
+    .p4maps { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; align-items: center; }
+    .ex-full { position: relative; }
+    .ex-full canvas, .ex-zoom canvas { display: block; width: 100%; aspect-ratio: 164 / 158; }
+    .ex-zoom canvas { aspect-ratio: 26 / 22; border: 1.5px solid #d62728; image-rendering: pixelated; }
+    .ex-box { position: absolute; border: 1.5px solid #d62728; }
+    .brk { grid-row: 4; text-align: center; font-family: var(--en); font-weight: 700; font-size: 0.95rem; color: var(--navy); }
+    .brk::before { content: ""; display: block; height: 10px; border: 2px solid var(--navy); border-top: 0; margin-bottom: 0.35rem; }
+    .brk.k { grid-column: 1 / 5; } .brk.v { grid-column: 5; }
+    .pipe-detail { margin-top: 1.1rem; background: var(--soft); border-radius: 10px; padding: 0.9rem 1.1rem; min-height: 7.2rem; word-break: keep-all; }
+    .pd-h { font-weight: 700; color: var(--navy); margin: 0 0 0.3rem; }
+    .pd-l { margin: 0 0 0.4rem 1.1rem; list-style: disc; font-size: 0.95rem; }
+    .pd-l b { color: var(--ink); }
+    .pd-links { margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: 0.92rem; font-weight: 500; }
+
+    /* ---------- station map (Figure 2) ---------- */
+    .stn-grid { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 1.75rem; align-items: stretch; }
+    .stn-map { position: relative; background: #f7f9fc; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .stn-map svg { display: block; width: 100%; height: auto; cursor: grab; }
+    .stn-map svg:focus-visible { outline: 3px solid #9fb6e0; outline-offset: -3px; }
+    .zoom-ctl { position: absolute; right: 0.5rem; top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .zoom-ctl button { width: 2.1rem; height: 2.1rem; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--navy); font-size: 1.05rem; line-height: 1; cursor: pointer; }
+    .zoom-ctl button:focus-visible { outline: 3px solid #9fb6e0; outline-offset: 1px; }
+    .pill.tog { display: inline-flex; align-items: center; }
+    .pill.tog[aria-pressed="false"] { opacity: 0.45; }
+    .pill .sw { width: 0.75rem; height: 0.75rem; margin-right: 0.4rem; }
+
+    /* ---------- observation cards · channels · interpolation (Dataset) ---------- */
+    .obs-list { display: flex; flex-direction: column; gap: 0.45rem; }
+    details.obs { border: 1px solid var(--line); border-radius: 10px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+    details.obs:hover, details.obs[open] { border-color: #9fb6e0; }
+    details.obs[open] { box-shadow: 0 0 0 3px rgba(31, 95, 174, 0.1); }
+    details.obs summary { list-style: none; cursor: pointer; padding: 0.5rem 0.75rem; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 0.5rem; align-items: center; }
+    details.obs summary::after { content: "\25BE"; grid-column: 3; grid-row: 1; color: var(--muted); font-size: 0.8rem; transition: transform .15s; }
+    details.obs[open] summary::after { transform: rotate(180deg); }
+    details.obs .sw { width: 0.8rem; height: 0.8rem; grid-row: 1; }
+    .obs-t { grid-row: 1; font-weight: 700; color: var(--navy); font-size: 0.95rem; }
+    .obs-s { grid-column: 2 / 4; font-size: 0.84rem; color: var(--muted); line-height: 1.5; word-break: keep-all; }
+    .obs-d { margin: 0; padding: 0 0.75rem 0.7rem 2.05rem; font-size: 0.87rem; line-height: 1.55; word-break: keep-all; }
+    .obs-d dt { font-size: 0.78rem; font-weight: 700; color: var(--blue); margin-top: 0.45rem; }
+    .obs-d dd { margin: 0; }
+    details.obs summary::-webkit-details-marker, details.ch summary::-webkit-details-marker { display: none; }
+    details.obs summary:focus-visible, details.ch summary:focus-visible { outline: 3px solid #9fb6e0; outline-offset: 2px; border-radius: 8px; }
+    .stn-grid { align-items: start; }
+    .stn-map { position: sticky; top: 16px; }   /* 카드를 펼쳐 읽는 동안 강조된 지도가 보이게 */
+    .sub-h { max-width: 880px; margin: 3.5rem auto 1rem; text-align: center; font-size: clamp(1.2rem, 2.3vw, 1.5rem); font-weight: 700; color: var(--navy); }
+    .how { list-style: none; max-width: 1100px; margin: 1.25rem auto 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 0.75rem; }
+    .how li { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem 0.95rem; font-size: 0.93rem; line-height: 1.6; word-break: keep-all; }
+    .how b { display: block; color: var(--navy); margin-bottom: 0.15rem; }
+    .ch-wrap { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+    .ch-h { font-weight: 700; color: var(--navy); margin: 0 0 0.4rem; }
+    .ch-h b { font-family: var(--en); color: var(--blue); font-weight: 800; }
+    details.ch { border-top: 1px solid var(--line); }
+    details.ch:last-child { border-bottom: 1px solid var(--line); }
+    details.ch summary { list-style: none; cursor: pointer; padding: 0.5rem 0.2rem; display: flex; justify-content: space-between; gap: 0.5rem; font-weight: 500; }
+    details.ch summary::before { content: "\25B8"; color: var(--muted); margin-right: 0.4rem; }
+    details.ch[open] summary::before { content: "\25BE"; }
+    details.ch summary .ch-n { margin-left: auto; }
+    .ch-n { font-family: var(--en); color: var(--muted); font-size: 0.88rem; }
+    .ch-note { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.45rem; word-break: keep-all; }
+    .ch-l { margin: 0 0 0.8rem; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .ch-l li { font-size: 0.82rem; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 0.12rem 0.5rem; }
+    .ch-u { color: var(--muted); }
+    .ch-l code { font-family: var(--en); font-size: 0.72rem; color: var(--muted); background: none; padding: 0 0 0 0.35rem; }
+
+    /* ---------- glossary terms · experiment aims ---------- */
+    .term { font: inherit; color: inherit; background: none; border: 0; border-bottom: 1px dotted currentColor; padding: 0; line-height: inherit; cursor: help; }
+    .term:focus-visible { outline: 2px solid #9fb6e0; outline-offset: 1px; border-radius: 2px; }
+    .term-pop { position: absolute; z-index: 30; max-width: min(300px, calc(100vw - 32px)); background: var(--navy); color: #fff; font-size: 0.85rem; line-height: 1.5;
+      padding: 0.5rem 0.7rem; border-radius: 8px; box-shadow: 0 6px 20px rgba(16, 24, 40, 0.2); pointer-events: none; word-break: keep-all; }
+    .aim { max-width: 880px; margin: -0.3rem auto 1.1rem; text-align: center; color: var(--blue); font-weight: 500; word-break: keep-all; }
+
+    /* ---------- platform tabs ---------- */
+    .tabs-k { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1rem; }
+    .tab { font-size: 0.92rem; font-weight: 600; padding: 0.55rem 1.1rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+    .tab[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+    .shot { padding: 0.6rem; }
+
+    /* ---------- charts ---------- */
+    .chart-head { display: flex; justify-content: center; margin-bottom: 0.75rem; }
+    .chart-box { position: relative; height: 380px; }
+    #chart-fig11b .chart-box { height: 440px; }
+    .tbl-wrap { max-width: 880px; margin: 2rem auto 0; }
+    .tbl-wrap .tcap { margin: 0 auto 0.6rem; }
+    .tbl-wrap .wide { margin-top: 0; }
+    details.tbl { max-width: 880px; margin: 1rem auto 0; }
+    details.tbl summary { cursor: pointer; text-align: center; color: var(--blue); font-size: 0.92rem; font-weight: 500; list-style: none; word-break: keep-all; }
+    details.tbl summary::-webkit-details-marker { display: none; }
+    details.tbl summary::before { content: "\25B8\00a0"; }
+    details.tbl[open] summary::before { content: "\25BE\00a0"; }
+    details.tbl .table-container { margin-top: 0.75rem; }
+    .table-container.card { padding: 0.5rem; }
+    .table { font-size: 0.92rem; }
+    .table th, .table td { white-space: nowrap; }
+
+    /* ---------- local weather / nowcast ---------- */
+    .swipe { position: relative; max-width: 900px; margin: 0 auto; border-radius: 8px; overflow: hidden; line-height: 0; user-select: none; }
+    .swipe img { width: 100%; display: block; pointer-events: none; }
+    .swipe-top { position: absolute; inset: 0; }
+    .swipe-tag { position: absolute; top: 0.6rem; padding: 0.15rem 0.55rem; line-height: 1.5; font-family: var(--en); font-weight: 600; font-size: 0.95rem; color: var(--navy); background: rgba(255,255,255,0.88); border-radius: 999px; pointer-events: none; }
+    .swipe-tag-l { left: 0.6rem; } .swipe-tag-r { right: 0.6rem; }
+    .swipe input[type=range] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+    .swipe-handle { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #fff; box-shadow: 0 0 3px rgba(0,0,0,0.5); pointer-events: none; }
+    .swipe-handle::after { content: "\2039\00a0\203A"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 2.2rem; height: 2.2rem; line-height: 2.1rem; text-align: center; font-size: 1.2rem; color: var(--navy); background: #fff; border-radius: 50%; box-shadow: 0 0 4px rgba(0,0,0,0.4); }
+    .swipe input:focus-visible ~ .swipe-handle::after { outline: 3px solid var(--navy); outline-offset: 2px; }
+    .nc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .nc-grid img { width: 100%; display: block; border: 1px solid var(--line); border-radius: 8px; }
+    .panel-title { text-align: center; font-family: var(--en); font-weight: 600; font-size: 0.95rem; color: var(--navy); margin-bottom: 0.35rem; }
+    .nc-ctl { margin-top: 1rem; }
+    .nc-rmse-line { font-size: 0.95rem; white-space: nowrap; }
+
+    /* ---------- bibtex / footer ---------- */
+    pre.bib { max-width: 880px; margin: 0 auto; background: #fff; border: 1px solid var(--line); border-radius: 10px; font-size: 0.85rem; line-height: 1.6; color: var(--ink); white-space: pre-wrap; }
+    .foot { padding: 28px 16px; text-align: center; font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); }
+    .foot a { color: var(--muted); text-decoration: underline; }
+
+    #img-modal .modal-content { max-width: 94vw; width: auto; }
+    #img-modal img { max-height: 90vh; width: auto; max-width: 94vw; background: #fff; border-radius: 6px; }
+
+    .shot-wrap { position: relative; }
+    .hs { position: absolute; transform: translate(-50%, -50%); width: 1.7rem; height: 1.7rem; padding: 0; border-radius: 50%; border: 2px solid #fff; background: #d62728; color: #fff;
+      font-size: 0.9rem; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); }
+    .hs.on { background: var(--navy); }
+    .hs:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+    .hs-pop { position: absolute; z-index: 5; width: max-content; max-width: 260px; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 20px rgba(16, 24, 40, 0.16);
+      padding: 0.55rem 0.8rem; font-size: 0.88rem; line-height: 1.5; color: var(--ink); pointer-events: none; word-break: keep-all; }
+    .hs-pop b { display: block; color: var(--navy); }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 960px) {
+      .try-grid, .stn-grid, .ch-wrap { grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
+      .pipe { display: flex; flex-direction: column; gap: 0.6rem; }
+      .pipe > * { order: var(--o); }
+      .ph { margin-top: 0.6rem; }
+      .brk { display: none; }
+      .p1b { grid-template-columns: minmax(0, 1fr); }
+      .p1b > :first-child { display: none; }
+      .stn-map { position: relative; top: 0; }
+      .mini-stn { max-width: 220px; margin: 0 auto; }
+      .cube { max-width: 230px; margin: 0 auto; }
+      .p4maps { width: 100%; max-width: 360px; margin: 0 auto; }
+    }
+    @media (max-width: 768px) {
+      body { font-size: 16px; }
+      .sec { padding: 56px 16px; }
+      .hero-k { padding: 56px 16px 48px; }
+      .hero-k h1 br { display: none; }
+      .chart-box { height: 300px; }
+      #chart-fig11b .chart-box { height: 360px; }
+      .card { padding: 0.9rem; }
+      .swipe-tag { font-size: 0.78rem; top: 0.3rem; } .swipe-tag-l { left: 0.3rem; } .swipe-tag-r { right: 0.3rem; }
+      .nc-grid { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
+      .nc-ctl { flex-wrap: wrap; }
+      .nc-rmse-line { flex-basis: 100%; white-space: normal; text-align: center; }
+      .subsec + .subsec { margin-top: 56px; }
+      .hs { width: 1.35rem; height: 1.35rem; font-size: 0.75rem; border-width: 1.5px; }
+      .hs-pop { max-width: 200px; font-size: 0.82rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===================== Hero ===================== -->
+<header class="hero-k">
+  <h1 lang="en">KOBRA: A Korean Observation-Based<br> Regional Atmospheric Data Platform</h1>
+  <p class="ko-title">대한민국 국지 기상을 반영한 관측 기반 다차원 기상 데이터 플랫폼</p>
+  <!-- TODO: authors and affiliations -->
+  <p class="authors" lang="en">Authors TBA</p>
+  <p class="venue" lang="en">Journal of the Korean Institute of Communications and Information Sciences (submitted)</p>
+  <div class="hero-links" lang="en">
+    <a href="static/pdf/KOBRA_paper.pdf" target="_blank"><span class="icon"><i class="fas fa-file-pdf"></i></span>Paper</a>
+    <!-- Code: 공개 후 추가 <a href="REPO_URL"><span class="icon"><i class="fab fa-github"></i></span>Code</a> -->
+  </div>
+</header>
+
+<!-- ===================== Try KOBRA (teaser) ===================== -->
+<section class="sec" id="try-kobra">
+  <h2 lang="en">Try KOBRA</h2>
+  <div class="wide card" id="try-demo" style="margin-top: 0;">
+    <div class="try-grid">
+      <div class="demo-map">
+        <canvas role="img"></canvas>
+        <img src="static/demo/try/coast.png" alt="">
+      </div>
+      <div class="try-side">
+        <div>
+          <div class="ctl-label">Variable</div>
+          <div class="pills" role="group" aria-label="변수"></div>
+        </div>
+        <div class="demo-legend"></div>
+        <div>
+          <div class="ctl-label">Time (KST)</div>
+          <div class="demo-time">
+            <button type="button" class="pill demo-play" aria-pressed="false"></button>
+            <input type="range" min="0" max="23" value="0" step="1" aria-label="시각 (KST)">
+            <span class="demo-time-label"></span>
+          </div>
+        </div>
+        <p class="demo-readout" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+  <p class="cap">KOBRA 5 km 데이터셋의 2024년 7월 15일(KST) 1시간 단위 값으로, 지도에 마우스를 올리면 <button type="button" class="term" aria-describedby="g-grid">격자</button>의 값·좌표·시각을 볼 수 있다(빈칸은 데이터셋에서 비어 있는 격자).</p>
+</section>
+
+<!-- ===================== Abstract ===================== -->
+<section class="sec alt" id="abstract">
+  <h2 lang="en">Abstract</h2>
+  <div class="prose">
+    <p>딥러닝 기상 예측 모델의 성능은 학습 데이터에 좌우되며, 국지 위험기상을 예측하려면 국지 기상을 담은 학습 데이터가 필요하다. 그러나 주로 사용되는 <button type="button" class="term" aria-describedby="g-rean">재분석</button> 데이터 <button type="button" class="term" aria-describedby="g-era5">ERA5</button>는 위경도 0.25°의 공간 해상도로 제공되어, 산지와 해안이 좁은 영역에 분포한 대한민국의 국지 기상을 표현하기 어렵다. 국내에서도 국지 기상 정보를 담은 데이터셋을 구축하려는 연구가 수행되었으나, 각 연구가 필요한 변수만으로 데이터셋을 개별 구축하여 변수·기간·보간 방법이 일관되지 않아 재사용과 결과 비교가 어렵다. 본 논문은 기상청의 지상·해양·고층 관측을 관측 지점 수, 기상 변수의 특성, 지형의 영향에 따라 서로 다른 보간 방법으로 격자화하여 2006~2025년의 5 km·500 m, 1시간 단위 104채널 다차원 데이터셋을 구축하고, 이를 필요한 범위만 추출할 수 있는 관측 기반 대한민국 기상 데이터 플랫폼 KOBRA(Korean Observation-Based Regional Atmospheric data platform)로 제공한다. <button type="button" class="term" aria-describedby="g-cv">교차검증</button>, ERA5와의 비교, 딥러닝 학습 실험을 통해 구축한 데이터셋이 관측소가 없는 위치의 값을 정확하게 추정하고, ERA5가 표현하지 못한 산지의 기온 차이를 나타내며, 별도의 전처리 없이 딥러닝 학습에 활용될 수 있음을 확인했다. KOBRA는 일관된 기준으로 구축된 관측 기반 데이터로 대한민국의 국지 기상을 연구할 수 있는 공통 기반을 제공하며, 새로운 변수와 관측으로 확장할 수 있다.</p>
+  </div>
+</section>
+
+<!-- ===================== Overview (Figure 1) ===================== -->
+<section class="sec" id="overview">
+  <h2 lang="en">Overview</h2>
+  <div class="prose">
+    <p>본 논문은 기상청의 지상·해양·고층 관측 데이터를 수집하여 데이터셋으로 구축하고 이를 플랫폼 형태로 제공하는 관측 기반 대한민국 기상 데이터 플랫폼 KOBRA(Korean Observation-Based Regional Atmospheric data platform)를 제안한다.
+    KOBRA는 관측의 수집부터 <button type="button" class="term" aria-describedby="g-interp">공간 보간</button>까지를 하나의 체계로 정의하며, 이 체계로 2006~2025년의 관측을 기상 변수의 특성에 맞게 공간 보간하여 5 km와 500 m 공간 해상도, 1시간 단위의 다차원 데이터셋을 구축한다.
+    구축한 데이터셋은 k-fold 교차검증으로 정확도를 평가하고, ERA5와 비교하여 국지 기상의 표현을 확인하며, 딥러닝 모델의 학습 실험으로 학습 데이터로서의 실용성을 검증한다.</p>
+  </div>
+  <div class="specs" lang="en">
+    <span class="spec"><b>104</b>channels</span>
+    <span class="spec"><b>5 km · 500 m</b>grids</span>
+    <span class="spec"><b>1 h</b>time step</span>
+    <span class="spec"><b>2006–2025</b>period</span>
+  </div>
+  <p class="hint">단계를 누르거나 마우스를 올리면 그 단계가 강조되고, 아래에 세부 내용과 관련 절로 가는 링크가 나온다</p>
+  <div class="wide card pipe-card" id="pipeline">
+    <div class="pipe">
+      <button type="button" class="ph c1 r1" style="--o:10" aria-controls="pipe-detail" aria-pressed="false">1. 관측 수집</button>
+      <button type="button" class="ph c2 r1" style="--o:20" aria-controls="pipe-detail" aria-pressed="false">2. 데이터셋 구축</button>
+      <button type="button" class="ph c3 r1" style="--o:30" aria-controls="pipe-detail" aria-pressed="false">3. 저장</button>
+      <button type="button" class="ph c4 r1" style="--o:40" aria-controls="pipe-detail" aria-pressed="false">4. 추출</button>
+      <button type="button" class="ph c5 r1" style="--o:50" aria-controls="pipe-detail" aria-pressed="false">5. 검증·활용</button>
+
+      <div class="pc c1 r2" data-s="0" style="--o:11">
+        <div class="p1">
+          <figure class="mini"><svg class="mini-stn" role="img" aria-label="2024년 관측소 분포"></svg><figcaption>관측소 분포</figcaption></figure>
+          <div class="grp">
+            <span class="gt">기상청 관측</span>
+            <div class="pb"><b>지상 관측</b>종관 · 방재 · 황사</div>
+            <div class="pb"><b>해양 관측</b>부이 · 등표</div>
+            <div class="pb"><b>고층 관측</b>라디오존데</div>
+          </div>
+        </div>
+      </div>
+      <div class="pc c1 r3" data-s="0" style="--o:12">
+        <div class="p1b"><div></div><div><div class="arr" aria-hidden="true">&#8595;</div><div class="pb"><b>전처리</b>결측 · 측정 오류 제외</div></div></div>
+      </div>
+
+      <div class="pc c2 r2" data-s="1" style="--o:21">
+        <div class="p2">
+          <div class="pb"><b>보간 방법 선택</b>관측 지점 수 · 변수 특성 · 지형에 따라 변수마다 방법 설정</div>
+          <div class="arr" aria-hidden="true">&#8594;</div>
+          <figure class="mini mini-grid" role="img" aria-label="2024년 7월 15일 14시 KOBRA 5 km 기온"><figcaption>공간 보간 결과 — 기온</figcaption></figure>
+        </div>
+      </div>
+      <div class="pc c2 r3" data-s="1" style="--o:22">
+        <div class="pb"><b>격자화</b>매 시각 공간 보간을 수행 · 변수마다 한 채널</div>
+      </div>
+
+      <div class="pc c3 r2" data-s="2" style="--o:31">
+        <div class="cube" role="img" aria-label="채널별로 쌓인 격자: 현지기압, 풍속, 상대습도, 기온"></div>
+      </div>
+      <div class="pc c3 r3" data-s="2" style="--o:32">
+        <div class="pb tint"><b>다차원 데이터셋</b>모든 관측 변수를 채널로 1시간 단위로 저장</div>
+      </div>
+
+      <div class="pc c4 r2" data-s="3" style="--o:41">
+        <div class="pb"><b>추출 범위 지정</b>데이터셋 · 변수 · 기간 · 영역</div>
+        <div class="arr" aria-hidden="true">&#8595;</div>
+        <figure class="mini">
+          <div class="p4maps" role="img" aria-label="전국 기온 지도에서 지정한 영역과 그 영역을 확대한 지도">
+            <div class="ex-full"><div class="ex-box"></div></div>
+            <div class="ex-zoom"></div>
+          </div>
+          <figcaption>데이터 확인 · 파일 내려받기</figcaption>
+        </figure>
+      </div>
+      <div class="pc c4 r3" data-s="3" style="--o:42">
+        <div class="pb dark"><b>KOBRA를 통한 추출 · 제공</b>지정한 조건의 데이터만 웹 화면 · API로 제공</div>
+      </div>
+
+      <div class="pc c5 r23" data-s="4" style="--o:51">
+        <a class="pb" href="#acc-cv"><b>교차검증</b>미관측 지점의 정확도 평가</a>
+        <div class="arr" aria-hidden="true">&#8595;</div>
+        <a class="pb" href="#acc-local"><b>ERA5와 비교</b>격자 안 국지 기상의 표현 확인</a>
+        <div class="arr" aria-hidden="true">&#8595;</div>
+        <a class="pb" href="#nowcasting"><b>초단기 예측 학습</b>학습 데이터로 활용</a>
+      </div>
+
+      <div class="brk k" lang="en">KOBRA</div>
+      <div class="brk v">검증 · 활용 실험</div>
+    </div>
+    <div class="pipe-detail" id="pipe-detail" aria-live="polite"></div>
+  </div>
+  <p class="cap">Figure 1. KOBRA의 데이터 파이프라인과 검증 실험 개요: (1) 관측 수집, (2) 데이터셋 구축, (3) 저장, (4) 추출, (5) 검증·활용</p>
+</section>
+
+<!-- ===================== Dataset (Figure 2, Table 1) ===================== -->
+<section class="sec alt" id="dataset">
+  <h2 lang="en">Dataset</h2>
+  <div class="prose">
+    <p>기상청 API를 통해 2006년부터 2025년까지의 지상·해양·고층 관측 데이터를 수집하고(Table 1), 결측과 측정 오류로 물리적으로 나타날 수 없는 값을 제외했다.
+    관측소는 시기에 따라 새로 설치되거나 폐지되므로, Figure 2는 2024년에 관측이 있었던 관측소를 기준으로 나타냈다.
+    수집한 관측은 관측 지점 수, 각 기상 변수의 특성, 지형의 영향에 따라 변수마다 보간 방법을 달리하여 경도 약 122.7~132.1°, 위도 약 31.5~38.7°의 영역에 매 시각 격자화했으며, 지상·해양 관측의 변수 73채널과 고층 관측의 기압면별 변수 31채널, 총 104채널의 데이터셋을 구축했다.</p>
+  </div>
+  <p class="hint">관측 종류 버튼으로 점을 켜고 끄고 관측 카드를 펼치면 그 관측망만 강조되며, 점을 가리키거나 누르면 지점 정보가 나온다. +/− 버튼·Ctrl+휠·두 손가락으로 확대하고 끌어서 옮긴다 (지도에서 ←→ 키로 지점 이동)</p>
+  <div class="wide card" id="station-map">
+    <div class="stn-grid">
+      <div class="stn-map">
+        <svg role="img" tabindex="0" aria-label="2024년 관측소 분포 지도. 화살표 키로 지점을 옮겨 가며 정보를 볼 수 있다"></svg>
+        <div class="zoom-ctl" lang="en">
+          <button type="button" class="z-in" aria-label="확대">+</button>
+          <button type="button" class="z-out" aria-label="축소">&minus;</button>
+          <button type="button" class="z-reset" aria-label="원래 크기">&#8634;</button>
+        </div>
+      </div>
+      <div class="try-side">
+        <div>
+          <div class="ctl-label">Observation network</div>
+          <div class="pills" role="group" aria-label="관측 종류"></div>
+        </div>
+        <p class="demo-readout" aria-live="polite"></p>
+        <div>
+          <div class="ctl-label">About each network</div>
+          <div class="obs-list">
+            <details class="obs" name="obs" data-k="ASOS">
+              <summary><span class="obs-t">종관기상관측</span><span class="obs-s">전국의 모든 관측소가 정해진 시각에 동시에 실시하는 지상 관측</span></summary>
+              <dl class="obs-d">
+                <dt>관측 변수</dt><dd>기온·강수·바람·기압과 같은 기본적인 기상 요소와, 사람이 직접 눈으로 확인해야 하는 구름 상태·시정·날씨 현상</dd>
+                <dt>생성 주기 · 지점 수</dt><dd>1시간 · 93곳</dd>
+                <dt>KOBRA에서</dt><dd>해당 지역의 날씨를 대표하는 값으로, 방재기상관측과 같은 물리량은 관측점을 합쳐 보간하고 운형·시정·적설·지중온도처럼 종관기상관측에만 있는 변수는 별도 채널이 된다.</dd>
+              </dl>
+            </details>
+            <details class="obs" name="obs" data-k="AWS">
+              <summary><span class="obs-t">방재기상관측</span><span class="obs-s">기상 현상에 따른 자연재해를 예방하기 위해 자동기상관측장비로 수행하는 지상 관측</span></summary>
+              <dl class="obs-d">
+                <dt>관측 변수</dt><dd>기온·상대습도·기압·바람·강수 (KOBRA 채널 기준)</dd>
+                <dt>생성 주기 · 지점 수</dt><dd>1시간 · 663곳</dd>
+                <dt>KOBRA에서</dt><dd>종관기상관측 사이의 공백을 메우고 국지적인 기상 현상을 담는 조밀한 관측으로, 종관기상관측과 같은 물리량은 관측점을 합쳐 보간하고 1시간 평균·최고·최저 같은 1시간 내 통계는 별도 채널이 된다.</dd>
+              </dl>
+            </details>
+            <details class="obs" name="obs" data-k="PM10">
+              <summary><span class="obs-t">황사관측</span><span class="obs-s">황사를 관측하는 변수인 PM10(지름 10 µm 이하의 미세먼지 농도)을 재는 지상 관측</span></summary>
+              <dl class="obs-d">
+                <dt>관측 변수</dt><dd>PM10 농도</dd>
+                <dt>생성 주기 · 지점 수</dt><dd>1시간 · 29곳</dd>
+                <dt>KOBRA에서</dt><dd>지점이 적고 농도가 지점마다 크게 달라 관측소 사이의 값을 추정할 근거가 없으므로, 보간하지 않고 관측소가 위치한 격자에만 관측값을 할당한다(1시간 평균·최고·최저 3채널).</dd>
+              </dl>
+            </details>
+            <details class="obs" name="obs" data-k="SEA">
+              <summary><span class="obs-t">해양 관측 (부이·등표)</span><span class="obs-s">해양 위의 대기와 해양의 상호작용으로 나타나는 기상 현상을 관측</span></summary>
+              <dl class="obs-d">
+                <dt>관측 변수</dt><dd>해양기상부이는 풍향·풍속·기압·기온·습도와 파고·파주기·파향·수온을, 등표기상관측장비는 풍향·풍속·기압·기온·습도 등을 관측한다.</dd>
+                <dt>생성 주기 · 지점 수</dt><dd>1시간 · 67곳</dd>
+                <dt>KOBRA에서</dt><dd>지상 관측소가 없는 연안 해역의 공백을 채우고 해안 지역의 국지 기상을 격자에 반영한다. 기온·바람·습도·현지기압은 지상 관측점과 합쳐 보간하고, 유의 파고·해수면 온도·해상 돌풍 풍속은 바다 격자에만 값이 있는 별도 채널이 된다.</dd>
+              </dl>
+            </details>
+            <details class="obs" name="obs" data-k="UPP">
+              <summary><span class="obs-t">고층 관측 (라디오존데)</span><span class="obs-s">대기의 연직 구조를 파악하기 위해 고도별 기상 요소를 관측</span></summary>
+              <dl class="obs-d">
+                <dt>관측 변수</dt><dd>기구에 매단 라디오존데가 상승하며 기압·기온·습도를 측정하고, 지상에서 추적한 이동 거리와 방향으로부터 풍속과 풍향을 산출한다.</dd>
+                <dt>생성 주기 · 지점 수</dt><dd>6시간 · 10곳 (기상청 8곳, 공군 2곳). 09시와 21시에 하루 2회 관측하며, 필요에 따라 03시와 15시에도 추가로 관측한다.</dd>
+                <dt>KOBRA에서</dt><dd>925~300 hPa의 다섯 기압면 관측을 기압면별 1차 평면 보간으로 격자화하고, 관측 사이의 시각은 앞뒤 관측의 평면을 시간 간격에 비례하여 평균한 값으로 채운다. 기압면별 기온·이슬점·바람·지위고도 등 31채널이 된다.</dd>
+              </dl>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="cap">Figure 2. 수집한 관측소의 분포 현황: (a) 지상·해양 관측소, (b) 고층 관측소</p>
+  <div class="tbl-wrap">
+    <p class="cap tcap">Table 1. 수집한 기상청 관측의 종류별 생성 주기와 지점 수</p>
+    <div class="table-container card">
+      <table class="table is-striped is-hoverable is-fullwidth">
+        <thead><tr><th colspan="2">관측 종류</th><th class="has-text-centered">생성 주기</th><th class="has-text-centered">지점 수</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="3">지상관측</td><td>종관기상관측</td><td class="has-text-centered">1시간</td><td class="has-text-centered">93</td></tr>
+          <tr><td>방재기상관측</td><td class="has-text-centered">1시간</td><td class="has-text-centered">663</td></tr>
+          <tr><td>황사관측</td><td class="has-text-centered">1시간</td><td class="has-text-centered">29</td></tr>
+          <tr><td>해양</td><td>부이·등표</td><td class="has-text-centered">1시간</td><td class="has-text-centered">67</td></tr>
+          <tr><td>고층</td><td>라디오존데</td><td class="has-text-centered">6시간</td><td class="has-text-centered">10</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <h3 class="sub-h" lang="en">Interpolation</h3>
+  <div class="prose">
+    <p>관측값은 관측소가 위치한 지점에서만 얻어지므로, 미관측 지점의 값은 주변 관측값으로부터 추정해야 한다.
+    본 연구는 공간 보간에 <button type="button" class="term" aria-describedby="g-krig">크리깅</button>을 적용했으나, 크리깅은 관측 지점 사이의 거리에 따른 값의 차이로 가중치를 정하므로 변수의 관측 지점 수와 기상 변수의 특성에 따라 그대로 적용할 수 없는 경우가 있다.
+    이에 변수를 관측 지점 수, 각 기상 변수의 특성, 지형의 영향에 따라 나누어 다음과 같이 보간했으며, 이 방법에 따라 매 시각 보간을 수행하여 데이터셋을 구축했다.</p>
+  </div>
+  <ul class="how">
+    <li><b>관측 지점이 적은 변수</b>고층 관측(10곳)은 기압면별로 관측값에 가장 가깝게 맞춘 평면의 높이를 격자값으로 삼는 1차 평면 보간을 적용하고, 하루 2회 관측 사이의 시각은 앞뒤 관측의 평면을 시간 간격에 비례하여 평균했다. PM10(29곳)은 보간하지 않고 관측소가 위치한 격자에만 관측값을 할당했다.</li>
+    <li><b>코드로 기록한 변수</b>현재일기·운형처럼 상태를 코드로 기록한 변수는 코드의 평균이 의미가 없으므로, 각 격자에 가장 가까운 관측소의 코드를 할당했다.</li>
+    <li><b>풍향</b>각도여서 359°와 1°의 평균이 반대 방향인 180°가 되므로, 풍속과 결합하여 동서·남북 성분으로 분해한 뒤 성분별로 보간하고 다시 풍향으로 합쳤다.</li>
+    <li><b>강수·적설·일조·돌풍</b>대부분의 시각에 0이고 드물게 큰 값이 나타나 그대로 보간하면 큰 값이 주변으로 퍼지므로, log(1+x) 변환을 거쳐 보간한 뒤 원래 값으로 되돌렸다.</li>
+    <li><b>상대습도</b>0~100% 범위를 벗어나는 값이 나오지 않도록, 0~100%의 비율을 상·하한이 없는 값으로 펴 주는 로짓 변환을 거쳐 보간했다.</li>
+    <li><b>지형의 영향을 받는 변수</b>기온·이슬점·지면온도·지중온도·현지기압은 해발고도와 남북 좌표로 구한 추세를 제거하고 잔차만 보간한 뒤 각 격자의 해발고도로 계산한 추세를 더하는 회귀 크리깅을, 풍속·해면기압처럼 지형의 영향이 작은 변수는 일반 크리깅을 적용했다.</li>
+  </ul>
+
+  <h3 class="sub-h" lang="en">Channels</h3>
+  <div class="prose">
+    <p>데이터셋은 지상·해양 관측의 변수 73채널, 고층 관측의 기압면별 변수 31채널 등 총 104채널로 구성된다.</p>
+  </div>
+  <p class="hint">묶음을 누르면 채널 이름과 코드가 나온다 (KOBRA 채널 명세 기준)</p>
+  <div class="ch-wrap" id="channels"></div>
+</section>
+
+<!-- ===================== Platform (Figures 6, 8) ===================== -->
+<section class="sec" id="platform">
+  <h2 lang="en">Platform</h2>
+  <div class="prose">
+    <p>데이터셋은 20년 동안의 104채널을 1시간 단위로 담고 있으며 연구마다 필요한 변수·기간·영역이 다르므로, 사용자가 필요한 범위만 지정하여 추출하는 웹 플랫폼으로 제공한다.
+    사용자는 데이터셋·변수·기간·영역을 지정하고 지도에서 분포를 확인한 뒤 파일을 내려받거나 같은 조건을 API로 요청하며(Figure 6), 분석 화면에서 변수 사이의 상관과 24절기별·행정구역별 분포를 확인하여 추출할 변수와 기간을 정할 수 있다(Figure 8).</p>
+  </div>
+  <p class="hint">번호에 마우스를 올리거나 누르면 항목 이름이 나온다. 화면을 누르면 크게 볼 수 있다</p>
+  <div class="wide">
+      <div class="tabs-k" role="tablist" aria-label="Platform screens" lang="en">
+        <button class="tab" role="tab" aria-selected="true" aria-controls="pf-explore" id="tab-explore">Explore</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="pf-relations" id="tab-relations" tabindex="-1">Analyze · Relations</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="pf-terms" id="tab-terms" tabindex="-1">Analyze · Solar terms</button>
+      </div>
+      <div class="card shot" role="tabpanel" id="pf-explore" aria-labelledby="tab-explore">
+        <div class="shot-wrap"><img class="zoom" src="static/images/platform/explore.png" alt="KOBRA 추출 화면: 2024년 7월 15일 14시 5 km 기온 지도"></div>
+      </div>
+      <div class="card shot" role="tabpanel" id="pf-relations" aria-labelledby="tab-relations" hidden>
+        <div class="shot-wrap"><img class="zoom" src="static/images/platform/relations.png" alt="KOBRA 분석 화면: 변수 관계" loading="lazy"></div>
+      </div>
+      <div class="card shot" role="tabpanel" id="pf-terms" aria-labelledby="tab-terms" hidden>
+        <div class="shot-wrap"><img class="zoom" src="static/images/platform/terms.png" alt="KOBRA 분석 화면: 24절기 비교" loading="lazy"></div>
+      </div>
+    <p class="cap" id="pf-cap">Figure 6. KOBRA의 데이터 조회·추출 화면: (a) 전체 화면(① 데이터셋 선택, ② 변수 선택, ③ 격자 지도, ④ 지점 값 조회, ⑤ 표시 변수 설정, ⑥ 색상 범례, ⑦ 시간 탐색), (b) 추출 조건 패널(⑧ 기간 선택, ⑨ 지역 선택, ⑩ 추출 실행)</p>
+  </div>
+</section>
+
+<!-- ===================== Experiments ===================== -->
+<section class="sec alt" id="experiments">
+  <h2 lang="en">Experiments</h2>
+
+  <div class="subsec" id="acc-cv">
+    <h3>4.1. 데이터셋 검증 및 평가</h3>
+    <p class="aim">이 실험은 관측소가 없는 위치에서 구축 데이터셋이 값을 얼마나 정확하게 추정하는지를 변수별로 확인한다.</p>
+    <div class="prose">
+      <p>구축한 데이터셋의 격자 값은 대부분 미관측 지점에서 추정한 것이므로, 관측소를 다섯 묶음으로 나누어 하나씩 돌아가며 제외하고 다시 구축한 격자의 값을 그 위치의 관측값과 비교하는 k-fold 교차검증(k=5)으로 정확도를 평가했다.
+      구축 데이터셋의 <button type="button" class="term" aria-describedby="g-rmse">평균제곱근오차</button>는 네 변수 모두 최근접 이웃법보다 낮았고, 기온은 1.41 °C로 역거리 가중법의 1.57 °C보다 10% 낮았다.
+      제외하는 관측소의 비율을 1%부터 30%까지 바꾸어도 기온의 평균제곱근오차는 1.53~1.63 °C에 머물렀다.</p>
+    </div>
+    <div class="wide card" id="chart-fig10">
+      <div class="chart-head"><div class="pills" role="group" aria-label="변수"></div></div>
+      <div class="chart-box"><canvas role="img" aria-label="제외한 관측소 비율별 보간 방법의 RMSE 그래프"></canvas></div>
+    </div>
+    <p class="cap">Figure 10. 관측소 분포 밀도에 따른 공간 보간 기법별 평균제곱근오차: (a) 기온, (b) 상대습도, (c) 풍속, (d) 1시간 강수</p>
+    <div class="tbl-wrap">
+      <p class="cap tcap">Table 2. k-fold 교차검증(k=5)을 통한 공간 보간 기법별 추정 오차</p>
+      <div class="table-container card">
+        <table class="table is-striped is-hoverable is-fullwidth">
+          <thead><tr><th>변수</th><th>평가 지표</th><th class="has-text-centered">KOBRA</th><th class="has-text-centered">IDW</th><th class="has-text-centered">Nearest neighbor</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="2">기온(°C)</td><td>RMSE</td><td class="has-text-centered"><strong>1.41</strong></td><td class="has-text-centered">1.57</td><td class="has-text-centered">1.97</td></tr>
+            <tr><td><button type="button" class="term" aria-describedby="g-mae">MAE</button></td><td class="has-text-centered"><strong>0.98</strong></td><td class="has-text-centered">1.08</td><td class="has-text-centered">1.33</td></tr>
+            <tr><td rowspan="2">상대습도(%p)</td><td>RMSE</td><td class="has-text-centered">8.58</td><td class="has-text-centered"><strong>8.54</strong></td><td class="has-text-centered">10.79</td></tr>
+            <tr><td>MAE</td><td class="has-text-centered"><strong>6.00</strong></td><td class="has-text-centered">6.06</td><td class="has-text-centered">7.48</td></tr>
+            <tr><td rowspan="2">풍속(m/s)</td><td>RMSE</td><td class="has-text-centered">1.46</td><td class="has-text-centered"><strong>1.43</strong></td><td class="has-text-centered">1.81</td></tr>
+            <tr><td>MAE</td><td class="has-text-centered"><strong>0.95</strong></td><td class="has-text-centered">0.96</td><td class="has-text-centered">1.20</td></tr>
+            <tr><td rowspan="2">1시간 강수(mm)</td><td>RMSE</td><td class="has-text-centered">0.86</td><td class="has-text-centered"><strong>0.81</strong></td><td class="has-text-centered">0.97</td></tr>
+            <tr><td>MAE</td><td class="has-text-centered"><strong>0.10</strong></td><td class="has-text-centered"><strong>0.10</strong></td><td class="has-text-centered">0.12</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsec" id="acc-local">
+    <h3>4.2. 국지 기상 표현 비교</h3>
+    <p class="aim">이 실험은 ERA5의 한 격자 안에서 평균되는 산지와 해안의 기온 차이를 구축 데이터셋이 관측대로 나타내는지 확인한다.</p>
+    <div class="prose">
+      <p>ERA5는 공간 해상도가 0.25°이므로 하나의 격자 안에 산지와 해안이 함께 포함되며, 두 지역의 기온이 달라도 하나의 값으로 나타난다.
+      2023년 1월 25일 15시 태백산맥 일대에서 구축 데이터셋은 능선의 저온과 동해안의 고온을 지형을 따라 구분했으며, 이 일대 관측소 5곳을 제외하고 다시 구축한 값으로도 ERA5에서 모두 −6.9 °C였던 평창, 대관령, 성산의 기온을 구분했다(Table 3).
+      전국의 관측소를 해발고도 구간으로 나누어 비교하면, 900 m 이상에서 기온의 평균제곱근오차는 ERA5가 6.89 °C, 구축 데이터셋이 3.85 °C였다(Figure 12).</p>
+    </div>
+    <p class="hint">가운데 손잡이를 좌우로 끌어 ERA5(왼쪽)와 KOBRA 500 m(오른쪽)를 비교할 수 있다</p>
+  <div class="wide card" id="swipe-demo">
+    <p class="panel-title">(a)</p>
+    <div class="swipe">
+      <img src="static/demo/swipe/kobra.png" alt="태백산맥 일대 KOBRA 500 m 기온">
+      <div class="swipe-top"><img src="static/demo/swipe/era5.png" alt="태백산맥 일대 ERA5 기온"></div>
+      <span class="swipe-tag swipe-tag-l" lang="en">ERA5 (0.25°)</span>
+      <span class="swipe-tag swipe-tag-r" lang="en">KOBRA (500 m)</span>
+      <input type="range" min="0" max="100" value="50" step="1" aria-label="ERA5(왼쪽)와 KOBRA(오른쪽) 비교">
+      <div class="swipe-handle" aria-hidden="true"></div>
+    </div>
+    <div class="demo-row"><div class="demo-legend"></div></div>
+  </div>
+    <div class="wide card" id="chart-fig11b">
+      <p class="panel-title">(b)</p>
+      <div class="chart-box"><canvas role="img" aria-label="홍천–강릉 산맥 횡단면의 거리별 지형고도, ERA5·KOBRA 기온과 관측소 기온 그래프"></canvas></div>
+    </div>
+    <p class="cap">Figure 11. 태백산맥 일대의 ERA5와 KOBRA 기온 비교: (a) 두 데이터셋의 영역별 기온 시각화, (b) 산맥 횡단면의 고도에 따른 데이터셋 기온과 관측소 기온 비교</p>
+    <div class="tbl-wrap">
+      <p class="cap tcap">Table 3. 태백산맥 일대 관측소의 관측값과 ERA5·KOBRA 기온 비교(°C)</p>
+      <div class="table-container card">
+        <table class="table is-striped is-hoverable is-fullwidth">
+          <thead><tr><th>구분</th><th class="has-text-centered">홍천</th><th class="has-text-centered">서석</th><th class="has-text-centered">평창</th><th class="has-text-centered">대관령</th><th class="has-text-centered">성산</th><th class="has-text-centered">MAE</th><th class="has-text-centered">RMSE</th></tr></thead>
+          <tbody>
+            <tr><td>관측</td><td class="has-text-centered">−7.5</td><td class="has-text-centered">−9.7</td><td class="has-text-centered">−10.8</td><td class="has-text-centered">−10.4</td><td class="has-text-centered">−6.5</td><td class="has-text-centered">–</td><td class="has-text-centered">–</td></tr>
+            <tr><td>ERA5</td><td class="has-text-centered">−8.4</td><td class="has-text-centered">−10.3</td><td class="has-text-centered">−6.9</td><td class="has-text-centered">−6.9</td><td class="has-text-centered">−6.9</td><td class="has-text-centered">1.86</td><td class="has-text-centered">2.42</td></tr>
+            <tr><td>KOBRA (Ours)</td><td class="has-text-centered">−8.1</td><td class="has-text-centered">−9.3</td><td class="has-text-centered">−9.3</td><td class="has-text-centered">−8.5</td><td class="has-text-centered">−5.4</td><td class="has-text-centered"><strong>1.12</strong></td><td class="has-text-centered"><strong>1.26</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="wide card" id="chart-fig12">
+      <div class="chart-box"><canvas role="img" aria-label="해발고도 구간별 ERA5와 KOBRA 기온 RMSE 그래프"></canvas></div>
+    </div>
+    <p class="cap">Figure 12. 해발고도에 따른 ERA5와 KOBRA의 기온 평균제곱근오차</p>
+  </div>
+
+  <div class="subsec" id="nowcasting">
+    <h3>4.3. 다운스트림 태스크 적용 실험</h3>
+    <p class="aim">이 실험은 구축 데이터셋을 별도의 가공 없이 딥러닝 모델의 학습 데이터로 활용할 수 있는지 확인한다.</p>
+    <div class="prose">
+      <p>플랫폼에서 추출한 5 km 데이터셋을 별도의 전처리 없이 사용하여, 과거 6시간의 기상 변수와 해발고도로 1~6시간 후의 기온, 풍속, 1시간 강수를 예측하는 <button type="button" class="term" aria-describedby="g-unet">U-Net</button>을 2020~2023년으로 학습했다.
+      학습에 사용하지 않은 2025년을 지상 관측소의 관측값으로 평가한 결과, 기온과 1시간 강수는 모든 <button type="button" class="term" aria-describedby="g-lead">예측 시간</button>에서 U-Net의 오차가 가장 낮았고 기온의 6시간 예측 오차는 2.27 °C로 <button type="button" class="term" aria-describedby="g-pers">지속성 예측</button>의 4.62 °C보다 51% 낮았다.
+      풍속은 1~2시간 예측에서 지속성 예측의 오차가 더 작았고, 3시간 예측부터 U-Net이 가장 정확했다.</p>
+    </div>
+    <p class="hint">2025년 9월 11일 09시에 시작한 기온 예측 사례이다. 재생 버튼이나 슬라이더로 예측 시간을 바꿀 수 있다</p>
+    <div class="wide card" id="nowcast-demo">
+      <div class="nc-grid">
+        <div><p class="panel-title">(a) Ground truth</p><img class="nc-truth" src="static/demo/nowcast/truth_1.png" alt=""></div>
+        <div><p class="panel-title">(b) U-Net prediction</p><img class="nc-pred" src="static/demo/nowcast/pred_1.png" alt=""></div>
+      </div>
+      <div class="demo-row"><div class="demo-legend"></div></div>
+      <div class="demo-time nc-ctl">
+        <button type="button" class="pill demo-play" aria-pressed="false"></button>
+        <input type="range" min="1" max="6" value="1" step="1" aria-label="예측 시간">
+        <span class="demo-time-label"></span>
+        <span class="nc-rmse-line">이 예측 시간의 U-Net 기온 관측소 RMSE(Table 5): <strong class="nc-rmse"></strong></span>
+      </div>
+    </div>
+    <p class="cap">Figure 13. KOBRA 데이터셋으로 학습한 U-Net의 1~6시간 기온 예측: (a) 실제값, (b) 예측값</p>
+    <div class="tbl-wrap">
+      <p class="cap tcap">Table 5. 관측소 관측값으로 평가한 예측 시간별 평균제곱근오차: U-Net, 지속성 예측, <button type="button" class="term" aria-describedby="g-clim">기후값 예측</button></p>
+    <div class="wide card" id="chart-table5">
+      <div class="chart-head"><div class="pills" role="group" aria-label="변수"></div></div>
+      <div class="chart-box"><canvas role="img" aria-label="예측 시간별 U-Net, 지속성 예측, 기후값 예측의 RMSE 그래프"></canvas></div>
+    </div>
+    <details class="tbl">
+      <summary>표 값 보기</summary>
+      <div class="table-container card">
+        <table class="table is-striped is-hoverable is-fullwidth">
+          <thead><tr><th>변수</th><th class="has-text-centered">예측 시간</th><th class="has-text-centered">U-Net</th><th class="has-text-centered">Persistence</th><th class="has-text-centered">Climatology</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="6">기온(°C)</td><td class="has-text-centered">1 h</td><td class="has-text-centered"><strong>1.32</strong></td><td class="has-text-centered">1.54</td><td class="has-text-centered">3.86</td></tr>
+            <tr><td class="has-text-centered">2 h</td><td class="has-text-centered"><strong>1.49</strong></td><td class="has-text-centered">2.64</td><td class="has-text-centered">3.95</td></tr>
+            <tr><td class="has-text-centered">3 h</td><td class="has-text-centered"><strong>1.69</strong></td><td class="has-text-centered">3.47</td><td class="has-text-centered">4.08</td></tr>
+            <tr><td class="has-text-centered">4 h</td><td class="has-text-centered"><strong>1.88</strong></td><td class="has-text-centered">4.06</td><td class="has-text-centered">4.17</td></tr>
+            <tr><td class="has-text-centered">5 h</td><td class="has-text-centered"><strong>2.08</strong></td><td class="has-text-centered">4.44</td><td class="has-text-centered">4.24</td></tr>
+            <tr><td class="has-text-centered">6 h</td><td class="has-text-centered"><strong>2.27</strong></td><td class="has-text-centered">4.62</td><td class="has-text-centered">4.28</td></tr>
+            <tr><td rowspan="6">풍속(m/s)</td><td class="has-text-centered">1 h</td><td class="has-text-centered">1.16</td><td class="has-text-centered"><strong>0.93</strong></td><td class="has-text-centered">1.57</td></tr>
+            <tr><td class="has-text-centered">2 h</td><td class="has-text-centered">1.23</td><td class="has-text-centered"><strong>1.19</strong></td><td class="has-text-centered">1.58</td></tr>
+            <tr><td class="has-text-centered">3 h</td><td class="has-text-centered"><strong>1.29</strong></td><td class="has-text-centered">1.38</td><td class="has-text-centered">1.58</td></tr>
+            <tr><td class="has-text-centered">4 h</td><td class="has-text-centered"><strong>1.35</strong></td><td class="has-text-centered">1.53</td><td class="has-text-centered">1.58</td></tr>
+            <tr><td class="has-text-centered">5 h</td><td class="has-text-centered"><strong>1.40</strong></td><td class="has-text-centered">1.63</td><td class="has-text-centered">1.58</td></tr>
+            <tr><td class="has-text-centered">6 h</td><td class="has-text-centered"><strong>1.44</strong></td><td class="has-text-centered">1.69</td><td class="has-text-centered">1.58</td></tr>
+            <tr><td rowspan="6">1시간 강수(mm)</td><td class="has-text-centered">1 h</td><td class="has-text-centered"><strong>0.92</strong></td><td class="has-text-centered">1.06</td><td class="has-text-centered">1.08</td></tr>
+            <tr><td class="has-text-centered">2 h</td><td class="has-text-centered"><strong>1.03</strong></td><td class="has-text-centered">1.29</td><td class="has-text-centered">1.15</td></tr>
+            <tr><td class="has-text-centered">3 h</td><td class="has-text-centered"><strong>1.15</strong></td><td class="has-text-centered">1.41</td><td class="has-text-centered">1.23</td></tr>
+            <tr><td class="has-text-centered">4 h</td><td class="has-text-centered"><strong>1.19</strong></td><td class="has-text-centered">1.47</td><td class="has-text-centered">1.23</td></tr>
+            <tr><td class="has-text-centered">5 h</td><td class="has-text-centered"><strong>1.23</strong></td><td class="has-text-centered">1.52</td><td class="has-text-centered">1.26</td></tr>
+            <tr><td class="has-text-centered">6 h</td><td class="has-text-centered"><strong>1.28</strong></td><td class="has-text-centered">1.60</td><td class="has-text-centered">1.29</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== Conclusion ===================== -->
+<section class="sec" id="conclusion">
+  <h2 lang="en">Conclusion</h2>
+  <div class="prose">
+    <p>본 논문은 기상청의 지상·해양·고층 관측을 변수의 특성에 맞게 보간하여 2006~2025년 1시간 단위의 5 km·500 m 격자 데이터셋으로 구축하고, 이 데이터셋을 필요한 범위만 추출하여 사용할 수 있도록 플랫폼 KOBRA를 제안했다.
+    세 가지 실험에서 구축 데이터셋은 관측소가 없는 위치에서도 정확했고, ERA5의 격자 안에서 평균되는 국지 기상을 담고 있었으며, 별도의 전처리 없이 딥러닝 모델의 학습 데이터로 활용할 수 있었다.
+    향후에는 같은 절차로 다른 공간 해상도의 데이터셋을 구축하고, 위성·레이더처럼 격자로 제공되는 관측을 같은 체계에 추가하여 멀티모달 학습으로 활용을 확장할 계획이다.
+    전체 내용은 <a href="static/pdf/KOBRA_paper.pdf" target="_blank">논문 PDF</a>에서 볼 수 있다.</p>
+  </div>
+</section>
+
+<!-- BibTeX: 게재 확정 후 추가 (button: <a href="#bibtex">, section id="bibtex") -->
+
+<footer class="foot" lang="en">
+  Page template adapted from <a href="https://github.com/liu-qilong/paper-page-template" target="_blank">paper-page-template</a>
+  (<a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>),
+  <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>.
+</footer>
+
+<!-- 용어 풀이: .term의 aria-describedby 대상. 원고 정의 우선, 없으면 일반 정의 -->
+<div id="glossary" hidden>
+  <span id="g-grid">지역을 일정한 간격의 칸으로 나눈 것으로, 칸마다 하나의 값을 담는다.</span>
+  <span id="g-rean">과거의 관측을 수치예보모델에 반영하여 대기 상태를 격자 단위로 재구성한 데이터이다.</span>
+  <span id="g-era5">유럽중기예보센터(ECMWF)의 전 지구 재분석 데이터로, 위경도 0.25°(약 28 km)의 공간 해상도로 제공된다.</span>
+  <span id="g-cv">k-fold 교차검증: 관측소를 k개의 묶음으로 나누고 묶음을 하나씩 돌아가며 제외한 뒤, 남은 관측소로 추정한 값을 제외한 관측소의 관측값과 비교하여 모든 관측소 위치에서 오차를 얻는 방법이다.</span>
+  <span id="g-interp">관측 지점의 값으로부터 미관측 지점의 값을 주변 관측값의 가중합으로 추정하는 기법이다.</span>
+  <span id="g-krig">두 지점 사이의 거리에 따라 관측값이 얼마나 비슷한지를 분석하여 예측 오차를 최소화하는 가중치를 구하는 공간 통계 기법이다.</span>
+  <span id="g-rmse">RMSE(Root Mean Square Error): 오차를 제곱하여 평균한 뒤 제곱근을 취한 값으로, 큰 오차에 더 큰 가중을 둔다.</span>
+  <span id="g-mae">평균절대오차(Mean Absolute Error): 추정값과 실제값의 차이를 절댓값으로 평균한 값이다.</span>
+  <span id="g-unet">격자를 입력받아 같은 크기의 격자를 출력하는 합성곱 신경망이다.</span>
+  <span id="g-lead">리드타임: 예측을 시작한 시각부터 예측 대상 시각까지의 시간 간격이다.</span>
+  <span id="g-pers">시작 시각의 값이 그대로 유지된다고 보는 예측이다.</span>
+  <span id="g-clim">같은 월·시각의 학습 기간 평균을 사용하는 예측이다.</span>
+</div>
+
+<!-- image lightbox: opens the full-size original (data-full) -->
+<div class="modal" id="img-modal">
+  <div class="modal-background"></div>
+  <div class="modal-content has-text-centered">
+    <img id="img-modal-img" alt="">
+  </div>
+  <button class="modal-close is-large" aria-label="close"></button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // 플랫폼 화면 탭
+  var CAPS = {
+    'pf-explore': 'Figure 6. KOBRA의 데이터 조회·추출 화면: (a) 전체 화면(① 데이터셋 선택, ② 변수 선택, ③ 격자 지도, ④ 지점 값 조회, ⑤ 표시 변수 설정, ⑥ 색상 범례, ⑦ 시간 탐색), (b) 추출 조건 패널(⑧ 기간 선택, ⑨ 지역 선택, ⑩ 추출 실행)',
+    'pf-relations': 'Figure 8. KOBRA의 분석 화면: (a) 변수 관계(① 기준 변수 선택, ② 기간 선택, ③ 상관 변수 시계열, ④ 상관 변수 목록), (b) 24절기 비교(① 절기별 값, ② 비교 연도 선택), (c) 시군구 비교(① 시군구별 지도, ② 지역별 순위, ③ 집계 방식 선택)',
+    'pf-terms': 'Figure 8. KOBRA의 분석 화면: (a) 변수 관계(① 기준 변수 선택, ② 기간 선택, ③ 상관 변수 시계열, ④ 상관 변수 목록), (b) 24절기 비교(① 절기별 값, ② 비교 연도 선택), (c) 시군구 비교(① 시군구별 지도, ② 지역별 순위, ③ 집계 방식 선택)'
+  };
+  var tabs = document.querySelectorAll('.tabs-k .tab');
+  function select(t) {
+    tabs.forEach(function (x) {
+      var on = x === t;
+      x.setAttribute('aria-selected', on);
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+    });
+    document.getElementById('pf-cap').textContent = CAPS[t.getAttribute('aria-controls')];
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); });
+    t.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (d) { var n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus(); }
+    });
+  });
+
+  // 용어 풀이 팝업 — 호버·포커스로 열고, 누르면 고정(모바일 탭). 바깥을 누르거나 Esc로 닫는다
+  var tip = document.createElement('div'), pinned = null;
+  tip.className = 'term-pop';
+  tip.hidden = true;
+  tip.setAttribute('aria-hidden', 'true');   // 낭독은 aria-describedby가 맡는다
+  document.body.appendChild(tip);
+  function tipOpen(t) {
+    tip.textContent = document.getElementById(t.getAttribute('aria-describedby')).textContent;
+    tip.hidden = false;
+    var r = t.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(r.left, document.documentElement.clientWidth - tip.offsetWidth - 8)) + window.scrollX + 'px';
+    tip.style.top = r.bottom + window.scrollY + 6 + 'px';
+  }
+  function tipClose() { pinned = null; tip.hidden = true; }
+  document.querySelectorAll('.term').forEach(function (t) {
+    t.addEventListener('mouseenter', function () { if (!pinned) tipOpen(t); });
+    t.addEventListener('mouseleave', function () { if (!pinned) tipClose(); });
+    t.addEventListener('focus', function () { tipOpen(t); });
+    t.addEventListener('blur', tipClose);
+    t.addEventListener('click', function () { if (pinned === t) return tipClose(); tipOpen(t); pinned = t; });
+  });
+  document.addEventListener('pointerdown', function (e) { if (pinned && !e.target.closest('.term')) tipClose(); });
+
+  // 라이트박스
+  var modal = document.getElementById('img-modal');
+  var modalImg = document.getElementById('img-modal-img');
+  document.querySelectorAll('img.zoom').forEach(function (img) {
+    img.addEventListener('click', function () {
+      modalImg.src = img.dataset.full || img.src;
+      modalImg.alt = img.alt;
+      modal.classList.add('is-active');
+    });
+  });
+  function closeModal() {
+    modal.classList.remove('is-active');
+    modalImg.removeAttribute('src');
+  }
+  modal.querySelector('.modal-background').addEventListener('click', closeModal);
+  modal.querySelector('.modal-close').addEventListener('click', closeModal);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeModal(); tipClose(); }
+  });
+});
+</script>
+</body>
+</html>
